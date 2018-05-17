@@ -30,11 +30,11 @@ restReq=[
     ('post', "/dps/v1/management/dataelements/",'{"name":"te_an","description":"DataElementwithalphanumerictokenization","type":"STRUCTURED","algorithm":"QID_TOKEN","tokenelement":{"type":"ALPHANUMERIC","tokenizer":"SLT_1_3","lengthpreserving":True,"fromleft":1,"fromright":3}}'),
     ('post', "/dps/v1/management/dataelements/",'{"name":"TE_CC_S13_L0R0","description":"TE_CC_S13_L0R0","type":"STRUCTURED","algorithm":"QID_TOKEN","tokenelement":{"type":"CREDITCARD","tokenizer":"SLT_1_3","fromleft":0,"fromright":0,"valueidentification":{	"invalidcardtype":False,	"invalidluhndigit":False,	"alphabeticindicator":False,	"alphabeticindicatorposition":1}}}'),
     ('post','/dps/v1/management/masks','{"name":"Mask_L2R2_Hash","description":"","fromleft":2,"fromright":2,"masked":True,"character":"#"}'),
-    ('post','/dps/v1/management/policies/', '{"name": "Policy1","description": "","type": "STRUCTURED","permissions": {  "access": { "protect": True, "reprotect": False, "unprotect": True  },  "audit": { "success": {"protect": True,"reprotect": False,"unprotect": True }, "failed": {"protect": True,"reprotect": False,"unprotect": True }  }}}'),
+    ('post','/dps/v1/management/policies/', '{"name":"Policy1","description":"","type":"STRUCTURED","permissions":{"access":{"protect":False,"reprotect":False,"unprotect":False},"audit":{"success":{"protect":False,"reprotect":False,"unprotect":False},"failed":{"protect":False,"reprotect":False,"unprotect":False}}}}'),
     ('post','/dps/v1/management/policies/{0}/roles.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role1","roles")},{"id":getIdByName(login,"role2","roles")}]'),
     ('post','/dps/v1/management/policies/{0}/dataelements.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"DES","dataelements")},{"id":getIdByName(login,"te_an","dataelements")}]'),
     ('post','/dps/v1/management/policies/{0}/roles/permissions.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role1","roles"),"dataelements":[{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":0,"id":getIdByName(login,"te_an","dataelements")},{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":0,"id":getIdByName(login,"DES","dataelements")}]}]'),
-    ('post','/dps/v1/management/policies/{0}/roles/permissions.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role1","roles"),"dataelements":[{"access":{"protect":True,"reprotect":True,"unprotect":False,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":getIdByName(login,"Mask_L2R2_Hash","masks"),"id":getIdByName(login,"te_an","dataelements")},{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"noaccessoperation":"EXCEPTION","id":getIdByName(login,"DES","dataelements")}]}]'),
+    ('post','/dps/v1/management/policies/{0}/roles/permissions.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role2","roles"),"dataelements":[{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":getIdByName(login,"Mask_L2R2_Hash","masks"),"id":getIdByName(login,"te_an","dataelements")},{"access":{"protect":False,"reprotect":True,"unprotect":False,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"noaccessoperation":"EXCEPTION","id":getIdByName(login,"DES","dataelements")}]}]'),
     ('post','/dps/v1/management/policies/{0}/ready.getIdByName(login,"Policy1","policies")','None'),
     ('post','/dps/v1/management/datastores','{"name": "Datastore1","description": "","default":False}'),
     ('post','/dps/v1/management/datastores/{0}/policies.getIdByName(login,"Datastore1","datastores")','[{"id": getIdByName(login,"Policy1","policies")}]'),
@@ -79,7 +79,24 @@ def test_setup_esa(type,api,payload,login):
             assert op.status_code == 200
 
 
-def test_protect(tools):
+def test_protect(tools,login):
     xcApiTool=tools['xcApiTool']
-    aa = subprocess.check_output(xcApiTool + ' -p 0 -u exampleuser1 -d1 DES -prot -in=raw -data jayant')
-    print(aa.strip())
+    dpsAdminTool=tools['dpsAdminTool']
+    esaUser=login[4]
+    esaPass=login[5]
+    clearText='jayant'.encode('iso-8859-1').hex()
+    print('input in  hex:' + clearText )
+    aa = subprocess.check_output(xcApiTool + ' -p 0 -u exampleuser1 -d1 te_an -prot -in=hex -data 0x' + clearText)
+    aa=aa.strip()
+    print( type(aa))
+    print('output in hex ' + str(aa))
+    print('output in str ' + aa.decode('utf-8'))
+    hexstring=aa.decode('utf-8')
+    hexstring=hexstring.lstrip('0x')
+    print('hexstring : ' + hexstring)
+    y=bytes.fromhex(hexstring)
+    print('output :' + y.decode('utf-8'))
+    z = list(aa)
+    print("list(aa) : "+str(z) )
+    op=subprocess.check_output(dpsAdminTool + ' -u ' + esaUser+':'+esaPass + ' -s "print(getdataelements())" ')
+    print(op)

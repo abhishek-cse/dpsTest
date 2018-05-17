@@ -22,12 +22,6 @@ global xcApiTool
 # execute and see standard output
 # pytest -s --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1
 
-
-
-
-
-
-
 def pytest_addoption(parser):
     parser.addoption("--esaip", action="store")
     parser.addoption("--esauser", action="store",default='admin')
@@ -36,8 +30,8 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="session",)
 def login(request):
-    USERNAME = request.config.getoption('esauser')
-    USER_PASSWORD = request.config.getoption('esapass')
+    ESA_USERNAME = request.config.getoption('esauser')
+    ESA_USER_PASSWORD = request.config.getoption('esapass')
     ESA_IP = request.config.getoption('esaip')
     PROT_IP = request.config.getoption('protip')
 
@@ -46,11 +40,11 @@ def login(request):
     # ESA_IP='192.168.2.12'
     LOGIN_URL = "https://{0}/Management/Login".format(ESA_IP)
     s_request = requests.Session()
-    r = s_request.post(LOGIN_URL, data={"loginname": USERNAME, "password": USER_PASSWORD},verify=False)
+    r = s_request.post(LOGIN_URL, data={"loginname": ESA_USERNAME, "password": ESA_USER_PASSWORD},verify=False)
     csrf_token = s_request.cookies.get_dict()['CSRF_TOKEN']
     headers = {'X-CSRF-TOKEN': csrf_token, 'origin': 'https://{0}/'.format(ESA_IP),
                "referer": "https://{0}/".format(ESA_IP), "Content-Type": "application/json",'If-Match':''}
-    return [s_request,headers,ESA_IP,PROT_IP]
+    return [s_request,headers,ESA_IP,PROT_IP,ESA_USERNAME,ESA_USER_PASSWORD]
 
 
 def find_nth(string, substring, n):
