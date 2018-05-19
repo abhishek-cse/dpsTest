@@ -84,6 +84,7 @@ def test_protect(tools,login):
     dpsAdminTool=tools['dpsAdminTool']
     esaUser=login[4]
     esaPass=login[5]
+    shell=tools['shell']
     clearText='jayant'.encode('iso-8859-1').hex()
     print('input in  hex:' + clearText )
     aa = subprocess.check_output(xcApiTool + ' -p 0 -u exampleuser1 -d1 te_an -prot -in=hex -data 0x' + clearText)
@@ -100,3 +101,9 @@ def test_protect(tools,login):
     print("list(aa) : "+str(z) )
     op=subprocess.check_output(dpsAdminTool + ' -u ' + esaUser+':'+esaPass + ' -s "print(getdataelements())" ')
     print(op)
+
+    op=subprocess.Popen(xcApiTool + ' -p 0 -u exampleuser4 -d1 te_an -prot -in=hex -data 0x' + clearText,stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=shell)
+    std_out, std_err = op.communicate()
+
+    print("stdout" + str(std_out))
+    print("stderr" + str(std_err))
