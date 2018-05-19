@@ -98,13 +98,15 @@ import os
 @pytest.fixture(scope="session",)
 def tools():
     if os.name=='nt':
-        basedir="C:\\Program Files\\Protegrity"
-        return   {'pepProviderTool':basedir + "\\Defiance DPS QA\\bin\\pepproviderapp.exe",
+        basedir='C:\\Program Files\\Protegrity'
+        return   {'pepProviderTool':basedir + '\\Defiance DPS QA\\bin\\pepproviderapp.exe',
                   'dpsAdminTool':basedir +'\\Defiance DPS\\bin\\dpsadmin.exe',
-                  'xcApiTool': basedir +'\\Defiance DPS QA\\bin\\xcapitestxcpep.exe'}
+                  'xcApiTool': basedir +'\\Defiance DPS QA\\bin\\xcapitestxcpep.exe',
+                  'shell':False}
 
     if os.name =='posix':
         basedir='/opt/protegrity_7.1.0.27'
         return    {'pepProviderTool':basedir+"/defiance_qa/bin/pepproviderapp",
                       'dpsAdminTool' :basedir+"/defiance_dps/bin/dpsadmin",
-                      'xcApiTool' :basedir+"/defiance_qa/bin/xcapitesttool"}
+                      'xcApiTool' :basedir+"/defiance_qa/bin/xcapitestxcpep",
+                      'shell':True}
