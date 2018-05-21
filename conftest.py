@@ -22,6 +22,9 @@ global xcApiTool
 # execute and see standard output
 # pytest -s --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1
 
+#create junit xml report
+#pytest --junitxml=C:\path\to\out_report.xml
+
 def pytest_addoption(parser):
     parser.addoption("--esaip", action="store")
     parser.addoption("--esauser", action="store",default='admin')
@@ -115,26 +118,23 @@ def tools():
 
 @pytest.fixture(scope="session",)
 def dpsadminOutput(tools,login):
-    xcApiTool=tools['xcApiTool']
     dpsAdminTool=tools['dpsAdminTool']
     esaAdminUser=login[4]
     esaAdminPass=login[5]
     shell=tools['shell']
-    getpolicyusers = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(getpolicyusers())" ',
+    getPolicyUsers = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(getpolicyusers())" ',
                                  shell=shell, bufsize=1, universal_newlines=True)
-    gettokenelements = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(gettokenelements())" ',
+    getTokenElements = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(gettokenelements())" ',
                                  shell=shell, bufsize=1, universal_newlines=True)
-    getdataelements = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(getdataelements())" ',
+    getDataElements = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(getdataelements())" ',
                                  shell=shell, bufsize=1, universal_newlines=True)
-    getfpeproperties = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(getfpeproperties())" ',
+    getFpeProperties = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(getfpeproperties())" ',
                                 shell=shell, bufsize=1, universal_newlines=True)
 
-    getdataelements=getdataelements.splitlines()[2:-1]
-    gettokenelements=gettokenelements.splitlines()[8:-1]
-    getpolicyusers=getpolicyusers.splitlines()[6:-1]
-    #getfpeproperties
+    getDataElements=getDataElements.splitlines()[2:-1]
+    getTokenElements=getTokenElements.splitlines()[8:-1]
+    getPolicyUsers=getPolicyUsers.splitlines()[6:-1]
+    #needs to be modified for FPE
+    #getFpeProperties=getFpeProperties.splitlines()[6:-1]
 
-
-
-
-    return [getdataelements,gettokenelements,getpolicyusers,getfpeproperties]
+    return [getDataElements,getTokenElements,getPolicyUsers,getFpeProperties]

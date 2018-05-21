@@ -117,7 +117,7 @@ userDeAccess=[('exampleuser1','DES','[A:URPD--] [S:URPD--] [F:URPD--] [M:<none> 
 
 
 @pytest.mark.parametrize("policyUserName,deName,access" ,userDeAccess)
-def test_protect(policyUserName,deName,access,dpsadminOutput):
+def test_dpsAdmin(policyUserName,deName,access,dpsadminOutput):
     #clearText='jayant'.encode('iso-8859-1').hex()
     #print('input in  hex:' + clearText )
     # aa = subprocess.check_output(xcApiTool + ' -p 0 -u exampleuser1 -d1 te_an -prot -in=hex -data 0x' + clearText,shell=shell)
@@ -134,16 +134,18 @@ def test_protect(policyUserName,deName,access,dpsadminOutput):
     # print("list(aa) : "+str(z) )
 
     getPolicyUsers=dpsadminOutput[2]
-    getDataElements=csv.DictReader(dpsadminOutput[0], delimiter=';')
+    getDataElements = csv.DictReader(dpsadminOutput[0], delimiter=';')
+    #commented since not used
+    #getTokenElements = csv.DictReader(dpsadminOutput[0], delimiter=';')
+
 
     #get sr. no of dataelement from getdataelements function
     for row in getDataElements:
         if row['Name']== deName:
             deNo=row['Pos']
-
     regex = re.compile(policyUserName)
     userindex = [i for i, item in enumerate(getPolicyUsers) if re.search(regex, item)][0]
-    assert access in getPolicyUsers[userindex+int(deNo)]
+    assert access in getPolicyUsers[userindex+int(deNo)], "not able match  expected is " + access + " actaul is "+ getPolicyUsers[userindex+int(deNo)]
 
 
 
