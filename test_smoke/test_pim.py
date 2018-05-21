@@ -7,6 +7,7 @@ import subprocess
 import io
 import csv
 import re
+import time
 requests.packages.urllib3.disable_warnings()
 getIdByName=pytest.helpers.getIdByName
 getProtIp=pytest.helpers.getProtIp
@@ -44,8 +45,9 @@ restReq=[
     ('post','/dps/v1/management/datastores/{0}/policies.getIdByName(login,"Datastore1","datastores")','[{"id": getIdByName(login,"Policy1","policies")}]'),
     ('post','/dps/v1/management/datastores/{0}/ranges.getIdByName(login,"Datastore1","datastores")','{"to":getProtIp(login),"from":getProtIp(login)}'),
     ('post','/dps/v1/management/datastores/{0}/deploy.getIdByName(login,"Datastore1","datastores")','None')
-]
-#testdata = [(line.rstrip('\n') ,) for line in open('inputAPI.param')]
+ ]
+
+#restReq = [(line.rstrip('\n') ,) for line in open('tests/test_smoke/inputAPI.parm')]
 
 def test_clear_esa(login):
     try:
@@ -53,6 +55,9 @@ def test_clear_esa(login):
         findAndDelete(login,'datastores')
         findAndDelete(login,'dataelements')
         findAndDelete(login,'nodes')
+        findAndDelete(login,'roles')
+        findAndDelete(login, 'sources')
+
     except:
         assert False
 
@@ -82,13 +87,34 @@ def test_setup_esa(type,api,payload,login):
         else:
             assert op.status_code == 200
 
-userDeAccess=[('exampleuser1','DES','[A:URPD--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:CLEAR    ]'),
-              ('exampleuser1','fpe','[A:------] [S:------] [F:------] [M:<none>          ] [O:NULL     ]'),
-              ('exampleuser2','DES','[A:-R-D--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:EXCEPTION]'),
-              ('exampleuser2','fpe','[A:U-P---] [S:------] [F:------] [M:<none>          ] [O:CLEAR    ]')]
 
-global getDataElements
-global getPolicyUsers
+def test_wait_for_policy_publish(login):
+    count=1
+    while True:
+        op = login[0].get('https://{0}{1}'.format(login[2], '/dps/v1/management/nodes?fields=datastore.id,datastore.name&extra=datastore'), verify=False,
+                       headers=login[1])
+        op = json.loads(op.text)
+        try:
+            #check if policy is seployed successfully
+            if 'OK' == [x["status"] for x in op if x['host'] in login[3] ][0]:
+                break
+            #if node under test is not registered yet
+        except IndexError:
+            pass
+        count=count+1
+        if count == 30:
+                assert False, "waited for 5 mins for policy to be deployed"
+        time.sleep(10)
+
+
+
+userDeAccess=[('exampleuser1','DES','[A:URPD--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:CLEAR    ]'),
+              ('exampleuser1','te_an','[A:URPD--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:CLEAR    ]'),
+              ('exampleuser2','DES','[A:-R-D--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:EXCEPTION]'),
+              ('exampleuser2','te_an','[A:URPD--] [S:URPD--] [F:URPD--] [M:M 2 / M 2 / Ch=#] [O:MASK     ]')
+              ]
+
+
 
 @pytest.mark.parametrize("policyUserName,deName,access" ,userDeAccess)
 def test_protect(policyUserName,deName,access,dpsadminOutput):
