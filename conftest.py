@@ -95,6 +95,7 @@ def getIfMatch(login,api,id):
 
 import subprocess
 import os
+import csv
 @pytest.fixture(scope="session",)
 def tools():
     if os.name=='nt':
@@ -110,3 +111,30 @@ def tools():
                       'dpsAdminTool' :basedir+"/defiance_dps/bin/dpsadmin",
                       'xcApiTool' :basedir+"/defiance_qa/bin/xcapitestxcpep",
                       'shell':True}
+
+
+@pytest.fixture(scope="session",)
+def dpsadminOutput(tools,login):
+    xcApiTool=tools['xcApiTool']
+    dpsAdminTool=tools['dpsAdminTool']
+    esaAdminUser=login[4]
+    esaAdminPass=login[5]
+    shell=tools['shell']
+    getpolicyusers = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(getpolicyusers())" ',
+                                 shell=shell, bufsize=1, universal_newlines=True)
+    gettokenelements = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(gettokenelements())" ',
+                                 shell=shell, bufsize=1, universal_newlines=True)
+    getdataelements = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(getdataelements())" ',
+                                 shell=shell, bufsize=1, universal_newlines=True)
+    getfpeproperties = subprocess.check_output(dpsAdminTool + ' -u ' + esaAdminUser + ':' + esaAdminPass + ' -s "print(getfpeproperties())" ',
+                                shell=shell, bufsize=1, universal_newlines=True)
+
+    getdataelements=getdataelements.splitlines()[2:-1]
+    gettokenelements=gettokenelements.splitlines()[8:-1]
+    getpolicyusers=getpolicyusers.splitlines()[6:-1]
+    #getfpeproperties
+
+
+
+
+    return [getdataelements,gettokenelements,getpolicyusers,getfpeproperties]

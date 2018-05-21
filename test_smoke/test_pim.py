@@ -4,11 +4,15 @@ import requests
 import  json
 import pytest
 import subprocess
+import io
+import csv
+import re
 requests.packages.urllib3.disable_warnings()
 getIdByName=pytest.helpers.getIdByName
 getProtIp=pytest.helpers.getProtIp
 findAndDelete=pytest.helpers.findAndDelete
 null = None
+
 
 #rest api from parameter file
 # def pytest_generate_tests(metafunc):
@@ -78,32 +82,47 @@ def test_setup_esa(type,api,payload,login):
         else:
             assert op.status_code == 200
 
+userDeAccess=[('exampleuser1','DES','[A:URPD--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:CLEAR    ]'),
+              ('exampleuser1','fpe','[A:------] [S:------] [F:------] [M:<none>          ] [O:NULL     ]'),
+              ('exampleuser2','DES','[A:-R-D--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:EXCEPTION]'),
+              ('exampleuser2','fpe','[A:U-P---] [S:------] [F:------] [M:<none>          ] [O:CLEAR    ]')]
 
-def test_protect(tools,login):
-    xcApiTool=tools['xcApiTool']
-    dpsAdminTool=tools['dpsAdminTool']
-    esaUser=login[4]
-    esaPass=login[5]
-    shell=tools['shell']
-    clearText='jayant'.encode('iso-8859-1').hex()
-    print('input in  hex:' + clearText )
-    aa = subprocess.check_output(xcApiTool + ' -p 0 -u exampleuser1 -d1 te_an -prot -in=hex -data 0x' + clearText,shell=shell)
-    aa=aa.strip()
-    print( type(aa))
-    print('output in hex ' + str(aa))
-    print('output in str ' + aa.decode('utf-8'))
-    hexstring=aa.decode('utf-8')
-    hexstring=hexstring.lstrip('0x')
-    print('hexstring : ' + hexstring)
-    y=bytes.fromhex(hexstring)
-    print('output :' + y.decode('utf-8'))
-    z = list(aa)
-    print("list(aa) : "+str(z) )
-    op=subprocess.check_output(dpsAdminTool + ' -u ' + esaUser+':'+esaPass + ' -s "print(getdataelements())" ',shell=shell)
-    print(op)
+global getDataElements
+global getPolicyUsers
 
-    op=subprocess.Popen(xcApiTool + ' -p 0 -u exampleuser4 -d1 te_an -prot -in=hex -data 0x' + clearText,stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=shell)
-    std_out, std_err = op.communicate()
+@pytest.mark.parametrize("policyUserName,deName,access" ,userDeAccess)
+def test_protect(policyUserName,deName,access,dpsadminOutput):
+    #clearText='jayant'.encode('iso-8859-1').hex()
+    #print('input in  hex:' + clearText )
+    # aa = subprocess.check_output(xcApiTool + ' -p 0 -u exampleuser1 -d1 te_an -prot -in=hex -data 0x' + clearText,shell=shell)
+    # aa=aa.strip()
+    # print( type(aa))
+    # print('output in hex ' + str(aa))
+    # print('output in str ' + aa.decode('utf-8'))
+    # hexstring=aa.decode('utf-8')
+    # hexstring=hexstring.lstrip('0x')
+    # print('hexstring : ' + hexstring)
+    # y=bytes.fromhex(hexstring)
+    # print('output :' + y.decode('utf-8'))
+    # z = list(aa)
+    # print("list(aa) : "+str(z) )
 
-    print("stdout" + str(std_out))
-    print("stderr" + str(std_err))
+    getPolicyUsers=dpsadminOutput[2]
+    getDataElements=csv.DictReader(dpsadminOutput[0], delimiter=';')
+
+    #get sr. no of dataelement from getdataelements function
+    for row in getDataElements:
+        if row['Name']== deName:
+            deNo=row['Pos']
+
+    regex = re.compile(policyUserName)
+    userindex = [i for i, item in enumerate(getPolicyUsers) if re.search(regex, item)][0]
+    assert access in getPolicyUsers[userindex+int(deNo)]
+
+
+
+    # op=subprocess.Popen(xcApiTool + ' -p 0 -u exampleuser4 -d1 te_an -prot -in=hex -data 0x' + clearText,stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=shell,bufsize=1, universal_newlines=True)
+    # std_out, std_err = op.communicate()
+    #
+    # print("stdout" + str(std_out))
+    # print("stderr" + str(std_err))
