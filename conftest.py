@@ -109,7 +109,7 @@ def tools():
                   'shell':False}
 
     if os.name =='posix':
-        basedir='/opt/protegrity_7.1.0.27'
+        basedir='/opt/protegrity_7.1.0.24'
         return    {'pepProviderTool':basedir+"/defiance_qa/bin/pepproviderapp",
                       'dpsAdminTool' :basedir+"/defiance_dps/bin/dpsadmin",
                       'xcApiTool' :basedir+"/defiance_qa/bin/xcapitestxcpep",

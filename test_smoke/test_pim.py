@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import requests
-import  json
+import json
 import pytest
 import subprocess
 import io
