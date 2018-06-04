@@ -119,21 +119,6 @@ userDeAccess=[('exampleuser1','DES','[A:URPD--] [S:URPD--] [F:URPD--] [M:<none> 
 
 @pytest.mark.parametrize("policyUserName,deName,access" ,userDeAccess)
 def test_dpsAdmin(policyUserName,deName,access,dpsadminOutput):
-    #clearText='jayant'.encode('iso-8859-1').hex()
-    #print('input in  hex:' + clearText )
-    # aa = subprocess.check_output(xcApiTool + ' -p 0 -u exampleuser1 -d1 te_an -prot -in=hex -data 0x' + clearText,shell=shell)
-    # aa=aa.strip()
-    # print( type(aa))
-    # print('output in hex ' + str(aa))
-    # print('output in str ' + aa.decode('utf-8'))
-    # hexstring=aa.decode('utf-8')
-    # hexstring=hexstring.lstrip('0x')
-    # print('hexstring : ' + hexstring)
-    # y=bytes.fromhex(hexstring)
-    # print('output :' + y.decode('utf-8'))
-    # z = list(aa)
-    # print("list(aa) : "+str(z) )
-
     getPolicyUsers=dpsadminOutput[2]
     getDataElements = csv.DictReader(dpsadminOutput[0], delimiter=';')
     #commented since not used
@@ -147,11 +132,3 @@ def test_dpsAdmin(policyUserName,deName,access,dpsadminOutput):
     regex = re.compile(policyUserName)
     userindex = [i for i, item in enumerate(getPolicyUsers) if re.search(regex, item)][0]
     assert access in getPolicyUsers[userindex+int(deNo)], "not able match  expected is " + access + " actaul is "+ getPolicyUsers[userindex+int(deNo)]
-
-
-
-    # op=subprocess.Popen(xcApiTool + ' -p 0 -u exampleuser4 -d1 te_an -prot -in=hex -data 0x' + clearText,stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=shell,bufsize=1, universal_newlines=True)
-    # std_out, std_err = op.communicate()
-    #
-    # print("stdout" + str(std_out))
-    # print("stderr" + str(std_err))
