@@ -58,6 +58,7 @@ def test_clear_esa(login):
         findAndDelete(login,'roles')
         findAndDelete(login, 'sources')
 
+
     except:
         assert False
 
