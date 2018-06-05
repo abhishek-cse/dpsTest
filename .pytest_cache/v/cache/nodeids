@@ -23,5 +23,6 @@
   "test_smoke/test_pim.py::test_dpsAdmin[exampleuser1-DES-[A:URPD--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:CLEAR    ]]",
   "test_smoke/test_pim.py::test_dpsAdmin[exampleuser1-te_an-[A:URPD--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:CLEAR    ]]",
   "test_smoke/test_pim.py::test_dpsAdmin[exampleuser2-DES-[A:-R-D--] [S:URPD--] [F:URPD--] [M:<none>          ] [O:EXCEPTION]]",
-  "test_smoke/test_pim.py::test_dpsAdmin[exampleuser2-te_an-[A:URPD--] [S:URPD--] [F:URPD--] [M:M 2 / M 2 / Ch=#] [O:MASK     ]]"
+  "test_smoke/test_pim.py::test_dpsAdmin[exampleuser2-te_an-[A:URPD--] [S:URPD--] [F:URPD--] [M:M 2 / M 2 / Ch=#] [O:MASK     ]]",
+  "test_smoke/test_pim.py::test_protect"
 ]

@@ -132,3 +132,28 @@ def test_dpsAdmin(policyUserName,deName,access,dpsadminOutput):
     regex = re.compile(policyUserName)
     userindex = [i for i, item in enumerate(getPolicyUsers) if re.search(regex, item)][0]
     assert access in getPolicyUsers[userindex+int(deNo)], "not able match  expected is " + access + " actaul is "+ getPolicyUsers[userindex+int(deNo)]
+
+def test_protect(tools):
+    xcApiTool = tools['xcApiTool']
+    shell = tools['shell']
+    clearText = 'jayant'.encode('iso-8859-1').hex()
+    print('input in  hex:' + clearText)
+
+    op = subprocess.Popen(xcApiTool + ' -p 0 -u exampleuser1 -d1 te_an -prot -in=hex -data 0x' + clearText,
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell, bufsize=1,
+                          universal_newlines=True)
+    std_out, std_err = op.communicate()
+    print("stdout" + str(std_out))
+    print("stderr" + str(std_err))
+
+
+    std_out = std_out.strip()
+    print(type(std_out))
+    print('output in hex ' + str(std_out))
+    std_out = std_out.lstrip('0x')
+    y = bytes.fromhex(std_out)
+    print('output :' + y.decode('iso-8859-1'))
+    z = list(std_out)
+    print("list(std_out) : " + str(z))
+
+

@@ -1,1 +1,3 @@
-{}
+{
+  "test_smoke/test_pim.py::test_wait_for_policy_publish": true
+}
