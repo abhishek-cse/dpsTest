@@ -37,9 +37,9 @@ restReq=[
     ('post','/dps/v1/management/masks','{"name":"Mask_L2R2_Hash","description":"","fromleft":2,"fromright":2,"masked":True,"character":"#"}'),
     ('post','/dps/v1/management/policies/', '{"name":"Policy1","description":"","type":"STRUCTURED","permissions":{"access":{"protect":False,"reprotect":False,"unprotect":False},"audit":{"success":{"protect":False,"reprotect":False,"unprotect":False},"failed":{"protect":False,"reprotect":False,"unprotect":False}}}}'),
     ('post','/dps/v1/management/policies/{0}/roles.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role1","roles")},{"id":getIdByName(login,"role2","roles")}]'),
-    ('post','/dps/v1/management/policies/{0}/dataelements.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"DES","dataelements")},{"id":getIdByName(login,"te_an","dataelements")}]'),
-    ('post','/dps/v1/management/policies/{0}/roles/permissions.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role1","roles"),"dataelements":[{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":0,"id":getIdByName(login,"te_an","dataelements")},{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":0,"id":getIdByName(login,"DES","dataelements")}]}]'),
-    ('post','/dps/v1/management/policies/{0}/roles/permissions.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role2","roles"),"dataelements":[{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":getIdByName(login,"Mask_L2R2_Hash","masks"),"id":getIdByName(login,"te_an","dataelements")},{"access":{"protect":False,"reprotect":True,"unprotect":False,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"noaccessoperation":"EXCEPTION","id":getIdByName(login,"DES","dataelements")}]}]'),
+    ('post','/dps/v1/management/policies/{0}/dataelements.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"DES","dataelements")},{"id":getIdByName(login,"te_an","dataelements")},{"id":getIdByName(login,"TE_CC_S13_L0R0","dataelements")}]'),
+    ('post','/dps/v1/management/policies/{0}/roles/permissions.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role1","roles"),"dataelements":[{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":0,"id":getIdByName(login,"te_an","dataelements")},{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":0,"id":getIdByName(login,"DES","dataelements")},{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":0,"id":getIdByName(login,"TE_CC_S13_L0R0","dataelements")}]}]'),
+    ('post','/dps/v1/management/policies/{0}/roles/permissions.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role2","roles"),"dataelements":[{"access":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"maskid":getIdByName(login,"Mask_L2R2_Hash","masks"),"id":getIdByName(login,"te_an","dataelements")},{"access":{"protect":False,"reprotect":True,"unprotect":False,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"noaccessoperation":"EXCEPTION","id":getIdByName(login,"DES","dataelements")},{"access":{"protect":False,"reprotect":True,"unprotect":False,"delete":True},"audit":{"success":{"protect":True,"reprotect":True,"unprotect":True,"delete":True},"failed":{"protect":True,"reprotect":True,"unprotect":True,"delete":True}},"noaccessoperation":"NULL","id":getIdByName(login,"TE_CC_S13_L0R0","dataelements")}]}]'),
     ('post','/dps/v1/management/policies/{0}/ready.getIdByName(login,"Policy1","policies")','None'),
     ('post','/dps/v1/management/datastores','{"name": "Datastore1","description": "","default":False}'),
     ('post','/dps/v1/management/datastores/{0}/policies.getIdByName(login,"Datastore1","datastores")','[{"id": getIdByName(login,"Policy1","policies")}]'),
@@ -133,27 +133,27 @@ def test_dpsAdmin(policyUserName,deName,access,dpsadminOutput):
     userindex = [i for i, item in enumerate(getPolicyUsers) if re.search(regex, item)][0]
     assert access in getPolicyUsers[userindex+int(deNo)], "not able match  expected is " + access + " actaul is "+ getPolicyUsers[userindex+int(deNo)]
 
-def test_protect(tools):
+
+userProtect=[('exampleuser1','te_an','-prot','Protegrity1234'),
+             ('exampleuser2', 'TE_CC_S13_L0R0', '-prot', '4386280021199090')]
+
+@pytest.mark.parametrize("policyUser,deName,action,input" ,userProtect)
+def test_protect(tools,policyUser,deName,action,input):
     xcApiTool = tools['xcApiTool']
     shell = tools['shell']
-    clearText = 'jayant'.encode('iso-8859-1').hex()
-    print('input in  hex:' + clearText)
-
-    op = subprocess.Popen(xcApiTool + ' -p 0 -u exampleuser1 -d1 te_an -prot -in=hex -data 0x' + clearText,
+    clearText = input.encode('iso-8859-1').hex()
+    op = subprocess.Popen(xcApiTool + ' -p 0 -u '+ policyUser +' -d1 '+ deName +' '+ action + ' -in=hex -data 0x' + clearText,
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell, bufsize=1,
                           universal_newlines=True)
     std_out, std_err = op.communicate()
-    print("stdout" + str(std_out))
-    print("stderr" + str(std_err))
-
-
     std_out = std_out.strip()
-    print(type(std_out))
-    print('output in hex ' + str(std_out))
+    if std_err == '':
+        print('std output  :' + std_out )
+        print('std err     :' + std_err)
+
     std_out = std_out.lstrip('0x')
     y = bytes.fromhex(std_out)
     print('output :' + y.decode('iso-8859-1'))
-    z = list(std_out)
-    print("list(std_out) : " + str(z))
+
 
 
