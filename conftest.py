@@ -99,7 +99,7 @@ def getIfMatch(login,api,id):
 import subprocess
 import os
 import csv
-@pytest.fixture(scope="session",)
+@pytest.fixture(scope="session")
 def tools():
     if os.name=='nt':
         basedir='C:\\Program Files\\Protegrity'
@@ -116,7 +116,7 @@ def tools():
                       'shell':True}
 
 
-@pytest.fixture(scope="session",)
+@pytest.fixture(scope="module")
 def dpsadminOutput(tools,login):
     dpsAdminTool=tools['dpsAdminTool']
     esaAdminUser=login[4]
@@ -138,3 +138,15 @@ def dpsadminOutput(tools,login):
     #getFpeProperties=getFpeProperties.splitlines()[6:-1]
 
     return [getDataElements,getTokenElements,getPolicyUsers,getFpeProperties]
+
+
+@pytest.helpers.register
+def analyzeProtect(login):
+    dataElements = login[0].get('https://{0}/dps/v1/management/dataelements'.format(login[2]), verify=False,
+                                headers=login[1])
+    dataElements = json.loads(dataElements.text)
+    masks = login[0].get('https://{0}/dps/v1/management/masks'.format(login[2]), verify=False,
+                                headers=login[1])
+    masks = json.loads(masks.text)
+
+

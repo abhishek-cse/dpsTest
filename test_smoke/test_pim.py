@@ -12,6 +12,7 @@ requests.packages.urllib3.disable_warnings()
 getIdByName=pytest.helpers.getIdByName
 getProtIp=pytest.helpers.getProtIp
 findAndDelete=pytest.helpers.findAndDelete
+analyzeProtect=pytest.helpers.analyzeProtect
 null = None
 
 
@@ -134,26 +135,32 @@ def test_dpsAdmin(policyUserName,deName,access,dpsadminOutput):
     assert access in getPolicyUsers[userindex+int(deNo)], "not able match  expected is " + access + " actaul is "+ getPolicyUsers[userindex+int(deNo)]
 
 
-userProtect=[('exampleuser1','te_an','-prot','Protegrity1234'),
-             ('exampleuser2', 'TE_CC_S13_L0R0', '-prot', '4386280021199090')]
+userProtect=[('exampleuser1','te_an','-prot','Protegrity1234','pass',''),
+             ('exampleuser1', 'TE_CC_S13_L0R0', '-prot', '4386280021199090','pass',''),
+             ('exampleuser2','DES','-prot','Jayant','pass',''),
+             ('exampleuser3', 'DES', '-prot', 'Jayant', 'fail', 'The username could not be found in the policy in shared memory')]
 
-@pytest.mark.parametrize("policyUser,deName,action,input" ,userProtect)
-def test_protect(tools,policyUser,deName,action,input):
+@pytest.mark.parametrize("policyUser,deName,action,input,status,message" ,userProtect)
+def test_protect(tools,policyUser,deName,action,input,status,message):
     xcApiTool = tools['xcApiTool']
     shell = tools['shell']
-    clearText = input.encode('iso-8859-1').hex()
-    op = subprocess.Popen(xcApiTool + ' -p 0 -u '+ policyUser +' -d1 '+ deName +' '+ action + ' -in=hex -data 0x' + clearText,
+    clearText=input
+    #clearText = input.encode('iso-8859-1').hex()
+    op = subprocess.Popen(xcApiTool + ' -p 0 -u '+ policyUser +' -d1 '+ deName +' '+ action + ' -in=raw  -out=raw -data ' + clearText,
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell, bufsize=1,
                           universal_newlines=True)
     std_out, std_err = op.communicate()
     std_out = std_out.strip()
-    if std_err == '':
-        print('std output  :' + std_out )
-        print('std err     :' + std_err)
-
-    std_out = std_out.lstrip('0x')
-    y = bytes.fromhex(std_out)
-    print('output :' + y.decode('iso-8859-1'))
+    std_err = std_err.strip()
+    print('std output  :' + std_out )
+    print('std err     :' + std_err)
+    if status == 'fail':
+        assert message in std_err
+    if status == 'passed':
+        #std_out = std_out.lstrip('0x')
+        #cipherText = bytes.fromhex(std_out).decode('iso-8859-1')
+        cipherText=std_out
+        analyzeProtect(deName,clearText,cipherText)
 
 
 
