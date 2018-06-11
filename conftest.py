@@ -31,7 +31,7 @@ def pytest_addoption(parser):
     parser.addoption("--esapass", action="store",default='admin1234')
     parser.addoption("--protip", action="store", default='127.0.0.1')
 
-@pytest.fixture(scope="session",)
+@pytest.fixture(scope="session")
 def login(request):
     ESA_USERNAME = request.config.getoption('esauser')
     ESA_USER_PASSWORD = request.config.getoption('esapass')
