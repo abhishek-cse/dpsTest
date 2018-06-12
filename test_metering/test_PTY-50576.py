@@ -9,9 +9,10 @@ import csv
 import re
 import time
 requests.packages.urllib3.disable_warnings()
-getIdByName=pytest.helpers.getIdByName
+getIdByName: object=pytest.helpers.getIdByName
 getProtIp=pytest.helpers.getProtIp
 findAndDelete=pytest.helpers.findAndDelete
+findAndDeleteFromDatastore=pytest.helpers.findAndDeleteFromDatastore
 analyzeProtect=pytest.helpers.analyzeProtect
 null = None
 
@@ -52,11 +53,11 @@ restReq=[
 
 def test_clear_esa(login):
     try:
-        findAndDelete(login, 'policies')
-        findAndDelete(login, 'datastores')
-        findAndDelete(login, 'dataelements')
-        findAndDelete(login, 'nodes')
-        findAndDelete(login, 'roles')
+        findAndDelete(login,'policies')
+        findAndDelete(login,'datastores')
+        findAndDelete(login,'dataelements')
+        findAndDelete(login,'nodes')
+        findAndDelete(login,'roles')
         findAndDelete(login, 'sources')
 
 
@@ -161,6 +162,30 @@ def test_protect(tools,policyUser,deName,action,input,status,message):
         #cipherText = bytes.fromhex(std_out).decode('iso-8859-1')
         cipherText=std_out
         analyzeProtect(deName,clearText,cipherText)
+
+
+restReq=[
+    ('/dps/v1/management/datastores/{0}/ranges.getIdByName(login,"Datastore1","datastores")')
+ ]
+
+
+@pytest.mark.parametrize("api",restReq)
+def test_clear_datastore_ranges(login, api):
+
+    if "getIdByName" in api:
+        uri, sub = api.split(".", 1)
+        sub = sub.split("&")
+        ids = []
+        for i in sub:
+            ids.append(eval(i))
+        api = str(uri).format(*ids)
+        ifmatch = pytest.helpers.getIfMatch(login, api, ids[0])
+        login[1]['If-Match'] = ifmatch
+
+        findAndDeleteFromDatastore(login, api)
+
+
+def test_clear_pepserverLog():
 
 
 
