@@ -94,6 +94,18 @@ def getIfMatch(login,api,id):
         pass
 
 
+@pytest.helpers.register
+def findAndDeleteFromDatastore(login, api):
+    op = login[0].get('https://{0}/{1}'.format(login[2], api), verify=False, headers=login[1])
+    try:
+        op = json.loads(op.text)
+        for x in op:
+            login[0].delete('https://{0}/{1}/{2}'.format(login[2], api, x["id"]), verify=False, headers=login[1])
+    except IndexError:
+        print("not found")
+
+
+
 #################################################################Protector related Stuffs##################################################################################################
 
 import subprocess
