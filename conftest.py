@@ -11,8 +11,8 @@ import string
 # example to pass variables on command line
 # pytest --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.11
 
-# run only tests in  test_pim.py
-# pytest --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  test_rest/test_pim.py
+# run only tests in  test_smoke.py
+# pytest --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  test_smoke/test_smoke.py
 
 # see which test function is passed
 # pytest -v --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1
@@ -20,8 +20,8 @@ import string
 # execute single test function
 # pytest --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  -k 'test_clear_esa'
 
-# run test function test_protect in  test_pim.py
-# pytest -s -v --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  test_smoke/test_pim.py -k test_protect
+# run test function test_protect in  test_smoke.py
+# pytest -s -v --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  test_smoke/test_smoke.py -k test_protect
 
 # execute and see standard output
 # pytest -s --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1
