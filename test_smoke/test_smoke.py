@@ -12,7 +12,7 @@ requests.packages.urllib3.disable_warnings()
 getIdByName=pytest.helpers.getIdByName
 getProtIp=pytest.helpers.getProtIp
 findAndDelete=pytest.helpers.findAndDelete
-analyzeProtect=pytest.helpers.analyzeProtect
+#analyzeProtect=pytest.helpers.analyzeProtect
 null = None
 
 
@@ -33,8 +33,8 @@ restReq=[
     ("post",'/dps/v1/management/roles/{0}/members.getIdByName(login,"role1","roles")','[{"name":"exampleuser1","type":"USER","sourceid":getIdByName(login,"FileSource1","sources")}]'),
     ("post",'/dps/v1/management/roles/{0}/members.getIdByName(login,"role2","roles")','[{"name":"exampleuser2","type":"USER","sourceid":getIdByName(login,"FileSource1","sources")}]'),
     ("post","/dps/v1/management/dataelements/",'{"name": "DES","description": "Data Element with Triple DES protection, including IV, CRC and KID","type": "STRUCTURED","algorithm": "QID_3DES_CBC","ivtype": "SYSTEM_APPEND","checksumtype": "CRC32","cipherformat": "INSERT_KEYID_V1"}'),
-    ('post', "/dps/v1/management/dataelements/",'{"name":"te_an","description":"DataElementwithalphanumerictokenization","type":"STRUCTURED","algorithm":"QID_TOKEN","tokenelement":{"type":"ALPHANUMERIC","tokenizer":"SLT_1_3","lengthpreserving":True,"fromleft":1,"fromright":3}}'),
-    ('post', "/dps/v1/management/dataelements/",'{"name":"TE_CC_S13_L0R0","description":"TE_CC_S13_L0R0","type":"STRUCTURED","algorithm":"QID_TOKEN","tokenelement":{"type":"CREDITCARD","tokenizer":"SLT_1_3","fromleft":0,"fromright":0,"valueidentification":{	"invalidcardtype":False,	"invalidluhndigit":False,	"alphabeticindicator":False,	"alphabeticindicatorposition":1}}}'),
+    ('post',"/dps/v1/management/dataelements/",'{"name":"te_an","description":"DataElementwithalphanumerictokenization","type":"STRUCTURED","algorithm":"QID_TOKEN","tokenelement":{"type":"ALPHANUMERIC","tokenizer":"SLT_1_3","lengthpreserving":True,"fromleft":1,"fromright":3}}'),
+    ('post',"/dps/v1/management/dataelements/",'{"name":"TE_CC_S13_L0R0","description":"TE_CC_S13_L0R0","type":"STRUCTURED","algorithm":"QID_TOKEN","tokenelement":{"type":"CREDITCARD","tokenizer":"SLT_1_3","fromleft":0,"fromright":0,"valueidentification":{	"invalidcardtype":False,	"invalidluhndigit":False,	"alphabeticindicator":False,	"alphabeticindicatorposition":1}}}'),
     ('post','/dps/v1/management/masks','{"name":"Mask_L2R2_Hash","description":"","fromleft":2,"fromright":2,"masked":True,"character":"#"}'),
     ('post','/dps/v1/management/policies/', '{"name":"Policy1","description":"","type":"STRUCTURED","permissions":{"access":{"protect":False,"reprotect":False,"unprotect":False},"audit":{"success":{"protect":False,"reprotect":False,"unprotect":False},"failed":{"protect":False,"reprotect":False,"unprotect":False}}}}'),
     ('post','/dps/v1/management/policies/{0}/roles.getIdByName(login,"Policy1","policies")','[{"id":getIdByName(login,"role1","roles")},{"id":getIdByName(login,"role2","roles")}]'),
@@ -57,7 +57,7 @@ def test_clear_esa(login):
         findAndDelete(login,'dataelements')
         findAndDelete(login,'nodes')
         findAndDelete(login,'roles')
-        findAndDelete(login, 'sources')
+        findAndDelete(login,'sources')
 
 
     except:
@@ -141,7 +141,7 @@ userProtect=[('exampleuser1','te_an','-prot','Protegrity1234','pass',''),
              ('exampleuser3', 'DES', '-prot', 'Jayant', 'fail', 'The username could not be found in the policy in shared memory')]
 
 @pytest.mark.parametrize("policyUser,deName,action,input,status,message" ,userProtect)
-def test_protect(tools,policyUser,deName,action,input,status,message):
+def test_protect(tools,fetchDeSettings,policyUser,deName,action,input,status,message,helpers):
     xcApiTool = tools['xcApiTool']
     shell = tools['shell']
     clearText=input
@@ -156,11 +156,11 @@ def test_protect(tools,policyUser,deName,action,input,status,message):
     print('std err     :' + std_err)
     if status == 'fail':
         assert message in std_err
-    if status == 'passed':
+    if status == 'pass':
         #std_out = std_out.lstrip('0x')
         #cipherText = bytes.fromhex(std_out).decode('iso-8859-1')
         cipherText=std_out
-        analyzeProtect(deName,clearText,cipherText)
+        helpers.analyzeProtect(deName,clearText,cipherText,fetchDeSettings)
 
 
 

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?><testsuite errors="0" failures="0" name="pytest" skips="0" tests="4" time="0.630"><testcase classname="test_smoke.test_pim" file="test_smoke\test_pim.py" line="142" name="test_protect[exampleuser1-te_an--prot-Protegrity1234-pass-]" time="0.07455611228942871"><system-out>std output  :PfBHljSIayN234
-std err     :
-</system-out></testcase><testcase classname="test_smoke.test_pim" file="test_smoke\test_pim.py" line="142" name="test_protect[exampleuser1-TE_CC_S13_L0R0--prot-4386280021199090-pass-]" time="0.0875692367553711"><system-out>std output  :0883516171079988
-std err     :
-</system-out></testcase><testcase classname="test_smoke.test_pim" file="test_smoke\test_pim.py" line="142" name="test_protect[exampleuser2-DES--prot-Jayant-fail-Permission denied]" time="0.06907987594604492"><system-out>std output  :
-std err     :XCProtect failed: W10JFEGADE:Permission denied
-</system-out></testcase><testcase classname="test_smoke.test_pim" file="test_smoke\test_pim.py" line="142" name="test_protect[exampleuser3-DES--prot-Jayant-fail-The username could not be found in the policy in shared memory]" time="0.06705331802368164"><system-out>std output  :
-std err     :XCProtect failed: W10JFEGADE:The username could not be found in the policy in shared memory.
-</system-out></testcase></testsuite>

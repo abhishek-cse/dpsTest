@@ -3,12 +3,16 @@ import requests
 import json
 pytest_plugins = ['helpers_namespace']
 global xcApiTool
+import subprocess
+import os
+import csv
+import string
 
 # example to pass variables on command line
 # pytest --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.11
 
-# run only tests in  test_pim.py
-# pytest --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  test_rest/test_pim.py
+# run only tests in  test_smoke.py
+# pytest --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  test_smoke/test_smoke.py
 
 # see which test function is passed
 # pytest -v --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1
@@ -16,8 +20,8 @@ global xcApiTool
 # execute single test function
 # pytest --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  -k 'test_clear_esa'
 
-# run test function test_protect in  test_pim.py
-# pytest -s -v --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  test_smoke/test_pim.py -k test_protect
+# run test function test_protect in  test_smoke.py
+# pytest -s -v --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1  test_smoke/test_smoke.py -k test_protect
 
 # execute and see standard output
 # pytest -s --esaip=192.168.2.12 --esauser=admin --esapass=admin1234 --protip=192.168.2.1
@@ -31,7 +35,7 @@ def pytest_addoption(parser):
     parser.addoption("--esapass", action="store",default='admin1234')
     parser.addoption("--protip", action="store", default='127.0.0.1')
 
-@pytest.fixture(scope="session",)
+@pytest.fixture(scope="session")
 def login(request):
     ESA_USERNAME = request.config.getoption('esauser')
     ESA_USER_PASSWORD = request.config.getoption('esapass')
@@ -108,9 +112,7 @@ def findAndDeleteFromDatastore(login, api):
 
 #################################################################Protector related Stuffs##################################################################################################
 
-import subprocess
-import os
-import csv
+
 @pytest.fixture(scope="session")
 def tools():
     if os.name=='nt':
@@ -152,13 +154,54 @@ def dpsadminOutput(tools,login):
     return [getDataElements,getTokenElements,getPolicyUsers,getFpeProperties]
 
 
-@pytest.helpers.register
-def analyzeProtect(login):
+@pytest.fixture(scope="module")
+def fetchDeSettings(login):
     dataElements = login[0].get('https://{0}/dps/v1/management/dataelements'.format(login[2]), verify=False,
                                 headers=login[1])
     dataElements = json.loads(dataElements.text)
     masks = login[0].get('https://{0}/dps/v1/management/masks'.format(login[2]), verify=False,
-                                headers=login[1])
+                         headers=login[1])
     masks = json.loads(masks.text)
+    return[dataElements,masks]
+
+class Helpers:
+    @staticmethod
+    def analyzeProtect(deName,clearText,cipherText,fetchDeSettings):
+        dataElements=fetchDeSettings[0]
+        algorithm=[x['algorithm'] for x in dataElements if x['name'] == deName][0]
+        if algorithm == 'QID_TOKEN':
+            tokenType=[x['tokenelement']['type'] for x in dataElements if x['name'] == deName][0]
+            if 'ALPHANUMERIC' == tokenType:
+                ascii_all = set(string.ascii_uppercase + string.ascii_lowercase + string.digits)
+                fromleft = [x['tokenelement']['fromleft'] for x in dataElements if x['name'] == deName][0]
+                fromright = [x['tokenelement']['fromright'] for x in dataElements if x['name'] == deName][0]
+                lengthpreserving = [x['tokenelement']['lengthpreserving'] for x in dataElements if x['name'] == deName][0]
+                allowshorttoken = [x['tokenelement']['allowshorttoken'] for x in dataElements if x['name'] == deName][0]
+                if lengthpreserving == True:
+                    if len(clearText) == len(cipherText):
+                        pass
+                    else:
+                        assert False, 'length of input '+ str(len(clearText)) + 'is not equal to output ' + str(len(cipherText))
+                if clearText[0:fromleft] == cipherText[0:fromleft] and clearText[-fromright:] == cipherText[-fromright:]:
+                    pass
+                else:
+                    assert False,'L /R is not preserved'
+
+                if clearText[fromleft:-fromright] != cipherText[fromleft:-fromright]:
+                    if ascii_all.issuperset(cipherText[fromleft:-fromright]):
+                        pass
+                    else:
+                        assert False,'ciphertext contains invalid characters'
+                else:
+                    assert False,'cleartext is equal to ciphertext'
+
+
+@pytest.fixture
+def helpers():
+    return Helpers
+
+
+
+
 
 
