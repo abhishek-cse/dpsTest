@@ -15,16 +15,7 @@ findAndDelete=pytest.helpers.findAndDelete
 findAndDeleteFromDatastore=pytest.helpers.findAndDeleteFromDatastore
 analyzeProtect=pytest.helpers.analyzeProtect
 null = None
-
-
-#rest api from parameter file
-# def pytest_generate_tests(metafunc):
-#     if 'testdata' in metafunc.fixturenames:
-#         with open("testdata.yml", 'r') as f:
-#             Iterations = yaml.load(f)
-#             metafunc.parametrize('testdata', [i for i in Iterations])
-
-
+clearPepserverLog=pytest.helpers.clearPepserverLog
 
 
 restReq=[
@@ -49,8 +40,6 @@ restReq=[
     ('post','/dps/v1/management/datastores/{0}/deploy.getIdByName(login,"Datastore1","datastores")','None')
  ]
 
-#restReq = [(line.rstrip('\n') ,) for line in open('tests/test_smoke/inputAPI.parm')]
-
 def test_clear_esa(login):
     try:
         findAndDelete(login,'policies')
@@ -68,7 +57,6 @@ def test_clear_esa(login):
 
 
 @pytest.mark.parametrize("type,api,payload",restReq)
-#@pytest.mark.skipif(test='smoke',reason="skipping for now")
 def test_setup_esa(type,api,payload,login):
 
     if "getIdByName" in api:
@@ -123,11 +111,7 @@ userDeAccess=[('exampleuser1','DES','[A:URPD--] [S:URPD--] [F:URPD--] [M:<none> 
 def test_dpsAdmin(policyUserName,deName,access,dpsadminOutput):
     getPolicyUsers=dpsadminOutput[2]
     getDataElements = csv.DictReader(dpsadminOutput[0], delimiter=';')
-    #commented since not used
-    #getTokenElements = csv.DictReader(dpsadminOutput[0], delimiter=';')
 
-
-    #get sr. no of dataelement from getdataelements function
     for row in getDataElements:
         if row['Name']== deName:
             deNo=row['Pos']
@@ -146,7 +130,6 @@ def test_protect(tools,policyUser,deName,action,input,status,message):
     xcApiTool = tools['xcApiTool']
     shell = tools['shell']
     clearText=input
-    #clearText = input.encode('iso-8859-1').hex()
     op = subprocess.Popen(xcApiTool + ' -p 0 -u '+ policyUser +' -d1 '+ deName +' '+ action + ' -in=raw  -out=raw -data ' + clearText,
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=shell, bufsize=1,
                           universal_newlines=True)
@@ -158,20 +141,12 @@ def test_protect(tools,policyUser,deName,action,input,status,message):
     if status == 'fail':
         assert message in std_err
     if status == 'passed':
-        #std_out = std_out.lstrip('0x')
-        #cipherText = bytes.fromhex(std_out).decode('iso-8859-1')
         cipherText=std_out
         analyzeProtect(deName,clearText,cipherText)
 
 
-restReq=[
-    ('/dps/v1/management/datastores/{0}/ranges.getIdByName(login,"Datastore1","datastores")')
- ]
-
-
-@pytest.mark.parametrize("api",restReq)
-def test_clear_datastore_ranges(login, api):
-
+def test_clear_datastore_ranges(login):
+    api = '/dps/v1/management/datastores/{0}/ranges.getIdByName(login,"Datastore1","datastores")'
     if "getIdByName" in api:
         uri, sub = api.split(".", 1)
         sub = sub.split("&")
@@ -183,9 +158,3 @@ def test_clear_datastore_ranges(login, api):
         login[1]['If-Match'] = ifmatch
 
         findAndDeleteFromDatastore(login, api)
-
-
-def test_clear_pepserverLog():
-
-
-
